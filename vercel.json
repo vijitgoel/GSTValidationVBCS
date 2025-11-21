@@ -2,10 +2,7 @@
   "version": 2,
   "functions": {
     "api/roles.js": {
-      "runtime": "nodejs16.x"  // Specify Node.js runtime version
-    },
-    "api/createUser.js": {
-      "runtime": "nodejs16.x"  // Another function, if you have one
+      "runtime": "nodejs16.x" 
     }
   }
 }
