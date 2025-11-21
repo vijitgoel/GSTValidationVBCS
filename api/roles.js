@@ -11,6 +11,16 @@ export default async function handler(req, res) {
 
   const auth = Buffer.from(`${username}:${password}`).toString("base64");
 
+  // Add CORS headers to the response
+  res.setHeader("Access-Control-Allow-Origin", "*"); // Allow all origins
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS"); // Allow these methods
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization"); // Allow these headers
+
+  // If it's a preflight OPTIONS request, just respond with 200
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+
   try {
     const url = `${fusionUrl}/hcmRestApi/resources/11.13.18.05/rolesLOV?` +
       `fields=RoleId,RoleName,RoleCode&onlyData=true&limit=${limit}&offset=${offset}`;
