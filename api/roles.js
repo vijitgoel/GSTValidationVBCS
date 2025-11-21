@@ -43,7 +43,12 @@ export default async function handler(req, res) {
 
     const data = JSON.parse(text);
 
-    res.status(200).json(data);
+     // Filter roles based on RoleName query parameter (if provided)
+    const filteredRoles = "Admin"
+      ? data.items.filter(role => role.RoleName.includes("Admin"))
+      : data.items;
+
+    res.status(200).json({ items: filteredRoles });
 
   } catch (err) {
     res.status(500).json({
