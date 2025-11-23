@@ -28,7 +28,7 @@ export default async function handler(req, res) {
 
   // Create the payload for creating the new user
   const payload = {
-    PersonNumber: personNumber,
+   
     Username: username,
     userAccountRoles: roles.map(role => ({ RoleCode: role }))  // Assuming roles are passed as an array of role codes
   };
