@@ -18,43 +18,58 @@ export default async function handler(req, res) {
   }
 
   // Extract the parameters from the request body
-  const { fusionUrl, adminUsername, adminPassword, username, personNumber, defaultPassword, roles } = req.body;
+  const {
+    fusionUrl,
+    adminUsername,
+    adminPassword,
+    username,
+    personNumber,
+    defaultPassword
+  } = req.body;
 
-  if (!fusionUrl || !adminUsername || !adminPassword || !username || !personNumber || !defaultPassword || !roles || roles.length === 0) {
+  if (!fusionUrl || !adminUsername || !adminPassword || !username || !personNumber || !defaultPassword) {
     return res.status(400).json({
-      error: "Missing required parameters: fusionUrl, adminUsername, adminPassword, username, personNumber, defaultPassword, and roles are required"
+      error: "Missing required parameters: fusionUrl, adminUsername, adminPassword, username, personNumber, defaultPassword are required"
     });
   }
 
-  // Create the payload for creating the new user
+  // ✅ SCIM compliant payload as per your requirement
   const payload = {
-   
-    Username: username,
-    userAccountRoles: roles.map(role => ({ RoleCode: role }))  // Assuming roles are passed as an array of role codes
+    schemas: [
+      "urn:scim:schemas:core:2.0:User"
+    ],
+    active: true,
+    userName: username,          // map username
+    password: defaultPassword,  // map default password
+    externalId: personNumber    // map personNumber
   };
 
   try {
-    // Make the POST request to Fusion HCM's userAccounts endpoint
-    const response = await fetch(`${fusionUrl}/hcmRestApi/resources/11.13.18.05/userAccounts`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Basic ${Buffer.from(`${adminUsername}:${adminPassword}`).toString("base64")}`,
-        "Content-Type": "application/vnd.oracle.adf.resourceitem+json"
-      },
-      body: JSON.stringify(payload)
-    });
+    const response = await fetch(
+      `${fusionUrl}/hcmRestApi/scim/Users`,   // change endpoint if needed
+      {
+        method: "POST",
+        headers: {
+          "Authorization": `Basic ${Buffer.from(`${adminUsername}:${adminPassword}`).toString("base64")}`,
+          "Content-Type": "application/scim+json"
+        },
+        body: JSON.stringify(payload)
+      }
+    );
 
-    // Check if the response is okay
     if (!response.ok) {
       const errorText = await response.text();
-      return res.status(response.status).json({ error: `Error creating user: ${errorText}` });
+      return res.status(response.status).json({ 
+        error: `Error creating SCIM user: ${errorText}` 
+      });
     }
 
-    // Parse the response and return it
     const data = await response.json();
     return res.status(200).json(data);
 
   } catch (err) {
-    return res.status(500).json({ error: `Internal server error: ${err.message}` });
+    return res.status(500).json({
+      error: `Internal server error: ${err.message}`
+    });
   }
 }
